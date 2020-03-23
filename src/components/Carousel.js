@@ -87,6 +87,17 @@ class Carousel extends Component {
         onSwipeMove: () => {},
     };
 
+    static getDerivedStateFromProps(props, state) {
+        if (props.autoPlay !== state.autoPlay) {
+            return {
+                ...state,
+                autoPlay: props.autoPlay,
+            };
+        }
+
+        return state;
+    }
+
     constructor(props) {
         super(props);
 
@@ -107,28 +118,6 @@ class Carousel extends Component {
         this.setupCarousel();
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.selectedItem !== this.state.selectedItem) {
-            this.updateSizes();
-            this.moveTo(nextProps.selectedItem);
-        }
-
-        if (nextProps.autoPlay !== this.state.autoPlay) {
-            this.setState(
-                {
-                    autoPlay: nextProps.autoPlay,
-                },
-                () => {
-                    if (this.state.autoPlay) {
-                        this.setupAutoPlay();
-                    } else {
-                        this.destroyAutoPlay();
-                    }
-                }
-            );
-        }
-    }
-
     componentDidUpdate(prevProps, prevState) {
         if (!prevProps.children && this.props.children && !this.state.initialized) {
             this.setupCarousel();
@@ -136,6 +125,19 @@ class Carousel extends Component {
         if (prevState.swiping && !this.state.swiping) {
             // We stopped swiping, ensure we are heading to the new/current slide and not stuck
             this.resetPosition();
+        }
+
+        if (this.props.selectedItem !== prevProps.selectedItem && this.props.selectedItem !== this.state.selectedItem) {
+            this.updateSizes();
+            this.moveTo(this.props.selectedItem);
+        }
+
+        if (prevState.autoPlay !== this.state.autoPlay) {
+            if (this.state.autoPlay) {
+                this.setupAutoPlay();
+            } else {
+                this.destroyAutoPlay();
+            }
         }
     }
 
